@@ -173,6 +173,28 @@ func (list *SkipList) Set(key, value interface{}) *Element {
 	return element
 }
 
+// Gets elements greater than specified key
+func (list *SkipList) GetValuesGreaterThan(key interface{}) (ret []interface{}) {
+	var prev *elementNode = &list.elementNode
+	var next *Element
+	score := getScore(key, list.reversed)
+
+	for i := list.level - 1; i >= 0; i-- {
+		next = prev.next[i]
+
+		for next != nil &&
+			(score > next.score || (score == next.score && list.keyFunc.Compare(key, next.key))) {
+			prev = &next.elementNode
+			next = next.next[i]
+		}
+	}
+
+	for ; next != nil; next = next.next[0] {
+		ret = append(ret, next.Value)
+	}
+	return
+}
+
 // Gets an element.
 // Returns element pointer if found, nil if not found.
 func (list *SkipList) Get(key interface{}) *Element {
